@@ -1,0 +1,6 @@
+<?php
+require_once 'config.php';
+$stmt = $pdo->query("SELECT TABLE_NAME, COLUMN_NAME, CONSTRAINT_NAME, REFERENCED_TABLE_NAME, REFERENCED_COLUMN_NAME FROM INFORMATION_SCHEMA.KEY_COLUMN_USAGE WHERE TABLE_SCHEMA = 'mahuran_camel_farm' AND REFERENCED_TABLE_NAME IS NOT NULL");
+$results = $stmt->fetchAll(PDO::FETCH_ASSOC);
+print_r($results);
+?>

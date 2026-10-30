@@ -1,0 +1,73 @@
+<?php
+require_once 'config.php';
+require_once 'functions.php';
+
+try {
+        $where = getBranchContextQuery();
+        $where_u = getBranchContextQuery('u');
+        $where_lh = getBranchContextQuery('lh');
+        $where_s = getBranchContextQuery('s');
+        $where_c = getBranchContextQuery('c');
+        $where_co = getBranchContextQuery('co');
+        $where_dr = getBranchContextQuery('dr');
+        $where_v = getBranchContextQuery('v');
+        $where_vv = getBranchContextQuery('vv');
+        $where_br = getBranchContextQuery('br');
+        $where_pt = getBranchContextQuery('pt');
+        $where_cl = getBranchContextQuery('cl');
+        $where_fr = getBranchContextQuery('fr');
+        $where_fp = getBranchContextQuery('fp');
+        $where_fc = getBranchContextQuery('fc');
+        $where_lr = getBranchContextQuery('lr');
+
+        $departments = $pdo->query("SELECT * FROM departments WHERE $where")->fetchAll(PDO::FETCH_ASSOC);
+        echo "departments OK\n";
+        $staff_list = $pdo->query("SELECT s.*, COALESCE(u.full_name, s.email, s.employee_id) as name, d.name as department_name FROM staff s LEFT JOIN users u ON s.user_id = u.id LEFT JOIN departments d ON s.department_id = d.id WHERE $where_s")->fetchAll(PDO::FETCH_ASSOC);
+        echo "staff_list OK\n";
+        $users = $pdo->query("SELECT * FROM users WHERE $where")->fetchAll(PDO::FETCH_ASSOC);
+        echo "users OK\n";
+        $login_history = $pdo->query("SELECT lh.*, u.username, u.full_name FROM login_history lh JOIN users u ON lh.user_id = u.id WHERE $where_lh ORDER BY lh.login_time DESC LIMIT 50")->fetchAll(PDO::FETCH_ASSOC);
+        echo "login_history OK\n";
+        $camels = $pdo->query("SELECT * FROM camels WHERE status='active' AND $where")->fetchAll(PDO::FETCH_ASSOC);
+        echo "camels OK\n";
+        $all_camels = $pdo->query("SELECT * FROM camels WHERE $where ORDER BY id DESC")->fetchAll(PDO::FETCH_ASSOC);
+        echo "all_camels OK\n";
+        $camel_ownership = $pdo->query("SELECT co.*, c.tag_id, c.name as camel_name FROM camel_ownership co JOIN camels c ON co.camel_id = c.id WHERE $where_co ORDER BY co.purchase_date DESC")->fetchAll(PDO::FETCH_ASSOC);
+        echo "camel_ownership OK\n";
+        $disease_records = $pdo->query("SELECT dr.*, c.tag_id, c.name as camel_name FROM disease_records dr JOIN camels c ON dr.camel_id = c.id WHERE $where_dr ORDER BY dr.diagnosed_date DESC")->fetchAll(PDO::FETCH_ASSOC);
+        echo "disease_records OK\n";
+        $vaccinations = $pdo->query("SELECT v.*, c.tag_id, c.name as camel_name FROM vaccinations v JOIN camels c ON v.camel_id = c.id WHERE $where_v ORDER BY v.vaccination_date DESC")->fetchAll(PDO::FETCH_ASSOC);
+        echo "vaccinations OK\n";
+        $vet_visits = $pdo->query("SELECT vv.*, c.tag_id, c.name as camel_name FROM vet_visits vv JOIN camels c ON vv.camel_id = c.id WHERE $where_vv ORDER BY vv.visit_date DESC")->fetchAll(PDO::FETCH_ASSOC);
+        echo "vet_visits OK\n";
+        $breeding_records = $pdo->query("SELECT br.*, fc.tag_id as female_tag, fc.name as female_name, mc.tag_id as male_tag, mc.name as male_name FROM breeding_records br JOIN camels fc ON br.female_camel_id = fc.id LEFT JOIN camels mc ON br.male_camel_id = mc.id WHERE $where_br ORDER BY br.breeding_date DESC")->fetchAll(PDO::FETCH_ASSOC);
+        echo "breeding_records OK\n";
+        $pregnancy_tracking = $pdo->query("SELECT pt.*, c.tag_id, c.name as camel_name FROM pregnancy_tracking pt JOIN camels c ON pt.camel_id = c.id WHERE $where_pt ORDER BY pt.check_date DESC")->fetchAll(PDO::FETCH_ASSOC);
+        echo "pregnancy_tracking OK\n";
+        $calves = $pdo->query("SELECT cl.*, c.tag_id as mother_tag, c.name as mother_name FROM calves cl LEFT JOIN camels c ON cl.mother_id = c.id WHERE $where_cl ORDER BY cl.birth_date DESC")->fetchAll(PDO::FETCH_ASSOC);
+        echo "calves OK\n";
+        $fertility_reports = $pdo->query("SELECT fr.*, c.tag_id, c.name as camel_name FROM fertility_reports fr JOIN camels c ON fr.camel_id = c.id WHERE $where_fr ORDER BY fr.report_date DESC")->fetchAll(PDO::FETCH_ASSOC);
+        echo "fertility_reports OK\n";
+        $feed_types = $pdo->query("SELECT * FROM feed_types WHERE $where")->fetchAll(PDO::FETCH_ASSOC);
+        echo "feed_types OK\n";
+        $feed_plans = $pdo->query("SELECT fp.*, ft.name as feed_type_name FROM feed_plans fp LEFT JOIN feed_types ft ON fp.feed_type_id = ft.id WHERE $where_fp")->fetchAll(PDO::FETCH_ASSOC);
+        echo "feed_plans OK\n";
+        $feed_consumption = $pdo->query("SELECT fc.*, c.tag_id, c.name as camel_name, ft.name as feed_type_name FROM feed_consumption fc JOIN camels c ON fc.camel_id = c.id JOIN feed_types ft ON fc.feed_type_id = ft.id WHERE $where_fc ORDER BY fc.date DESC")->fetchAll(PDO::FETCH_ASSOC);
+        echo "feed_consumption OK\n";
+        $feed_suppliers = $pdo->query("SELECT * FROM feed_suppliers WHERE $where")->fetchAll(PDO::FETCH_ASSOC);
+        echo "feed_suppliers OK\n";
+        $feed_purchases = $pdo->query("SELECT fp.*, fs.name as supplier_name, ft.name as feed_type_name FROM feed_purchases fp JOIN feed_suppliers fs ON fp.supplier_id = fs.id JOIN feed_types ft ON fp.feed_type_id = ft.id WHERE $where_fp ORDER BY fp.purchase_date DESC")->fetchAll(PDO::FETCH_ASSOC);
+        echo "feed_purchases OK\n";
+        $leave_requests = $pdo->query("SELECT lr.*, s.employee_id, s.position FROM leave_requests lr JOIN staff s ON lr.staff_id = s.id WHERE $where_lr ORDER BY lr.start_date DESC")->fetchAll(PDO::FETCH_ASSOC);
+        echo "leave_requests OK\n";
+        $products = $pdo->query("SELECT * FROM products WHERE status='active' AND $where")->fetchAll(PDO::FETCH_ASSOC);
+        echo "products OK\n";
+        $customers = $pdo->query("SELECT * FROM customers WHERE status='active' AND $where")->fetchAll(PDO::FETCH_ASSOC);
+        echo "customers OK\n";
+        $roles = $pdo->query("SELECT * FROM roles")->fetchAll(PDO::FETCH_ASSOC);
+        echo "roles OK\n";
+        $all_branches = $pdo->query("SELECT * FROM branches")->fetchAll(PDO::FETCH_ASSOC);
+        echo "branches OK\n";
+} catch (Exception $e) {
+    echo "ERROR AT RUNTIME: " . $e->getMessage() . "\n";
+}
